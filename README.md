@@ -1,2 +1,2 @@
 # expense-module
-Codebase for Expense Module for a construction company
+Expense Module Codebase for a construction company
