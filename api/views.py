@@ -29,17 +29,17 @@ class UserListCreateView(generics.ListCreateAPIView):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class ProjectListCreateView(generics.ListCreateAPIView):
-    serializer_class = ProjectSerializer
-    queryset = Project.objects.all()
+# class ProjectListCreateView(generics.ListCreateAPIView):
+#     serializer_class = ProjectSerializer
+#     queryset = Project.objects.all()
 
-class ItemListCreateView(generics.ListCreateAPIView):
-    serializer_class = ItemSerializer
-    queryset = Item.objects.all()
+# class ItemListCreateView(generics.ListCreateAPIView):
+#     serializer_class = ItemSerializer
+#     queryset = Item.objects.all()
 
-class ActionItemListCreateView(generics.ListCreateAPIView):
-    serializer_class = ActionItemSerializer
-    queryset = ActionItem.objects.all()
+# class ActionItemListCreateView(generics.ListCreateAPIView):
+#     serializer_class = ActionItemSerializer
+#     queryset = ActionItem.objects.all()
 
 class ExpenseHeaderListCreateView(generics.ListCreateAPIView):
     serializer_class = ExpenseHeaderSerializer

@@ -10,14 +10,14 @@ import uuid
 class User(AbstractUser):
     usertype = models.CharField(max_length=9, choices=macros.USER_TYPE)
 
-class Item(models.Model):
-    description=models.CharField(max_length=20)
+# class Item(models.Model):
+#     description=models.CharField(max_length=20)
 
-class ActionItem(models.Model):
-    name=models.CharField(max_length=20)
+# class ActionItem(models.Model):
+#     name=models.CharField(max_length=20)
 
-class Project(models.Model):
-    name=models.CharField(max_length=20)
+# class Project(models.Model):
+#     name=models.CharField(max_length=20)
 
 class ExpenseHeader(models.Model):
     UUID=models.UUIDField(default = uuid.uuid4,editable = False,unique=True)
@@ -51,12 +51,12 @@ class ExpenseHeader(models.Model):
 class ExpenseLine(models.Model):
     UUID=models.UUIDField(default = uuid.uuid4,editable = False,unique=True)
     division_id=models.IntegerField()   #set automaticaly from the division_id of the expense_header in expense_header_id
-    project_id=models.ForeignKey(Project,on_delete=models.SET_NULL,null=True,related_name='expense_line_project')   #refers to a project
-    action_item_id=models.ForeignKey(ActionItem,on_delete=models.SET_NULL,null=True,related_name='expense_line_action')    #refers to an action_item
+    project_id=models.TextField(default="") 
+    action_item_id=models.TextField(default="")    
     expense_header_id=models.ForeignKey(ExpenseHeader,on_delete=models.SET_NULL,related_name='ExpenseLine_expense_header',null=True)    #refers to an expense_header,set automaticaly from the expense_header.UUId
     expense_header_uuid=models.UUIDField(max_length=100)    #set automaticaly from the expense_header_id.UUId
     line_number=models.IntegerField(unique=True)    #generated automaticaly in increamental order
-    item_id=models.ForeignKey(Item,on_delete=models.SET_NULL,related_name='ExpenseLine_item',null=True)  #refers to an item
+    item_id=models.TextField(default="")
     item_description=models.TextField() #set automatical from item_id.description
     quantity=models.DecimalField(max_digits=13,decimal_places=2)
     unit_price=models.DecimalField(max_digits=13,decimal_places=2)
@@ -75,7 +75,7 @@ class ExpenseLine(models.Model):
     #overiding default save method
     def save(self,*args,**kwargs):
         self.expense_header_id=ExpenseHeader.objects.get(UUID=self.expense_header_uuid)   #get expense_header_id from the expense_header_uuid given
-        self.item_description=self.item_id.description  #obtain item_description from item_id
+        self.item_description=""  #Item Description as Empty String
         #self.division_id=self.expense_header_id.division_id #obtain division_id from expense_header_id.division_id
         self.total_price=self.quantity*self.unit_price  #calculate total price
 

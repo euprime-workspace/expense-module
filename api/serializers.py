@@ -7,20 +7,20 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'password', 'usertype']
 
-class ProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-        fields = ['name']
+# class ProjectSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Project
+#         fields = ['name']
 
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = ['description']
+# class ItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Item
+#         fields = ['description']
 
-class ActionItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ActionItem
-        fields = ['name']
+# class ActionItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ActionItem
+#         fields = ['name']
 
 class ExpenseHeaderSerializer(serializers.ModelSerializer):
     change_reason = serializers.CharField(allow_blank=True, required=False)
