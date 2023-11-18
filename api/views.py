@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.decorators import api_view
 from django.contrib.auth.hashers import make_password
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
+from django.http import Http404
 from .serializers import *
 from .models import *
 
@@ -116,18 +117,9 @@ class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET'])
-def expense_header_history(request, UUID):
-    # Get the Expense_header instance
-    expense_header = get_object_or_404(ExpenseHeader, UUID=UUID)
-
-    # Get the historical records for the Expense_header
-    historical_records = HistoricalExpense_headers.objects.filter(
-        UUID=expense_header.UUID,  # Assuming you have an id field for ExpenseHeader
-    )
-
-    # Serialize the historical records
+def expense_header_history(request, expense_header_uuid):
+    historical_records = HistoricalExpense_headers.objects.filter(UUID=expense_header_uuid)
     serializer = HistoricalExpenseHeadersSerializer(historical_records, many=True)
-
     return Response(serializer.data)
 
 # GET,POST view of ExpenseLine
@@ -178,13 +170,8 @@ class ExpenseLineRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView
 
 @api_view(['GET'])
 def expense_line_history(request, UUID):
-    expense_line = get_object_or_404(ExpenseLine, UUID=UUID)
-
-    his = HistoricalExpenseLine.objects.filter(
-        UUID=expense_line.UUID,
-    )
-
-    serializer = HistoricalExpenseLineSerializer(his, many=True)
+    historical_records = HistoricalExpenseLine.objects.filter(UUID=UUID)
+    serializer = HistoricalExpenseLineSerializer(historical_records, many=True)
     return Response(serializer.data)
 
 class ExpenseLinesByExpenseHeader(generics.ListCreateAPIView):
@@ -193,13 +180,10 @@ class ExpenseLinesByExpenseHeader(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = ExpenseLine.objects.all()
-        header_id = self.request.query_params.get('header_id')
-        if header_id:
-            queryset.filter(expense_header_id=header_id)
-        line_id = self.request.query_params.get('line_id')
-        if line_id:
-            queryset.filter(UUID=line_id)
-        return queryset
+        expense_header_uuid = self.kwargs.get('expense_header_uuid')
+        if expense_header_uuid:
+            return get_list_or_404(ExpenseLine, expense_header_uuid=expense_header_uuid)
+        else: raise Http404("expense_header_uuid not supplied")
 
     def post(self, request, *args, **kwargs):
         data = request.data
@@ -214,25 +198,19 @@ class ExpenseLinesByExpenseHeader(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ExpenseLineByExpenseHeaderAndExpenseLineListCreateView(generics.ListCreateAPIView):
-    queryset = ExpenseLine.objects.all()
-    serializer_class = ExpenseLineSerializer
-    lookup_field = 'UUID'
-
-    def get_queryset(self):
-        queryset = ExpenseLine.objects.all()
-        line_id = self.request.query_params.get('line_id')
-        if line_id:
-            queryset.filter(UUID=line_id)
-        return queryset
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-
 class ExpenseLineByExpenseHeaderAndExpenseLineRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseLine.objects.all()
     serializer_class = ExpenseLineSerializer
-    lookup_field = 'UUID'
+    lookup_fields = ['UUID', 'expense_header_uuid']
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter_kwargs = {}
+        for lookup_field in self.lookup_fields:
+            lookup_value = self.kwargs[lookup_field]
+            filter_kwargs[lookup_field] = lookup_value
+        obj = get_object_or_404(queryset, **filter_kwargs)
+        return obj 
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
