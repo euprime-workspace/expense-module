@@ -5,14 +5,16 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.decorators import api_view
 from django.contrib.auth.hashers import make_password
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from .serializers import *
 from .models import *
 from . import macros
 
-class UserListCreateView(generics.ListCreateAPIView):
+@authentication_classes([])
+@permission_classes([AllowAny])
+class UserListCreateView(generics.CreateAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
 
@@ -22,13 +24,13 @@ class UserListCreateView(generics.ListCreateAPIView):
             serializer.is_valid(raise_exception=True)
             serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
             self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response('Users created', status=status.HTTP_201_CREATED)
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
         self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response('User Created', status=status.HTTP_201_CREATED)
 
 # class ProjectListCreateView(generics.ListCreateAPIView):
 #     serializer_class = ProjectSerializer
