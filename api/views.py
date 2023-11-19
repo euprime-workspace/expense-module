@@ -7,9 +7,10 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from .serializers import *
 from .models import *
+from . import macros
 
 class UserListCreateView(generics.ListCreateAPIView):
     serializer_class = UserSerializer
@@ -118,8 +119,8 @@ class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
 
 @api_view(['GET'])
 def expense_header_history(request, expense_header_uuid):
-    historical_records = HistoricalExpense_headers.objects.filter(UUID=expense_header_uuid)
-    serializer = HistoricalExpenseHeadersSerializer(historical_records, many=True)
+    historical_records = HistoricalExpenseHeader.objects.filter(UUID=expense_header_uuid)
+    serializer = HistoricalExpenseHeaderSerializer(historical_records, many=True)
     return Response(serializer.data)
 
 # GET,POST view of ExpenseLine
@@ -218,3 +219,23 @@ class ExpenseLineByExpenseHeaderAndExpenseLineRetrieveUpdateDestroyView(generics
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+@api_view(['GET'])
+def expense_lines_by_project_id(request):
+    queryset = ExpenseLine.objects.all()
+    project_id = request.query_params.get('project_id')
+    if project_id:
+        queryset = queryset.filter(project_id=project_id)
+    action_item_id = request.query_params.get('action_item_id')
+    if action_item_id:
+        queryset = queryset.filter(action_item_id=action_item_id)
+    status = request.query_params.get('status')
+    if status:
+        status = status.replace('"', '')
+        queryset = queryset.filter(status=status)
+    payment_status = request.query_params.get('payment_status')
+    if payment_status:
+        payment_status = payment_status.replace('"', '')
+        queryset = queryset.filter(payment_status=payment_status)
+    serializer = ExpenseLineSerializer(queryset, many=True)
+    return Response(serializer.data)

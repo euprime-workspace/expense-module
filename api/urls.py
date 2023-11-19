@@ -20,4 +20,5 @@ urlpatterns = [
     path('expenses/lines/history/<uuid:UUID>/', views.expense_line_history, name='Read Expense Line History'),
     path('expenses/<uuid:expense_header_uuid>/lines/', views.ExpenseLinesByExpenseHeader.as_view(), name = 'Read and Create Expense Lines By Expense Header'),
     path('expenses/<uuid:expense_header_uuid>/lines/<uuid:UUID>/', views.ExpenseLineByExpenseHeaderAndExpenseLineRetrieveUpdateDestroyView.as_view(), name = 'Read, Update and Delete Expense Line By Expense Header And Expense Line'),
+    path('expenses/lines', views.expense_lines_by_project_id, name='Expense Lines By Project Id')
 ]
