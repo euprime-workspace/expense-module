@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 import os
 
@@ -61,7 +62,9 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
-    "USER_ID_FIELD":"id"
+    'USER_ID_FIELD':'id',
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(hours=2)
 }
 
 MIDDLEWARE = [
@@ -101,11 +104,11 @@ WSGI_APPLICATION = 'expenses.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv("DB_NAME", None),
-        'HOST': os.getenv("DB_HOST", 'localhost'),
-        'PORT': os.getenv("DB_PORT", 3306),
-        'USER': os.getenv("DB_USERNAME", None),
-        'PASSWORD': os.getenv("DB_PASSWORD", None),
+        'NAME': os.getenv('DB_NAME', None),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', 3306),
+        'USER': os.getenv('DB_USERNAME', None),
+        'PASSWORD': os.getenv('DB_PASSWORD', None),
     }
 }
 
