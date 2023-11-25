@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.decorators import api_view
@@ -102,6 +103,65 @@ class ExpenseHeaderListCreateView(generics.ListCreateAPIView):
             validated_data['updated_by'] = user
             validated_data['change_reason'] = change_reason  # Set the change_reason
             serializer.save(**validated_data)
+
+class ExtendedExpenseHeader(APIView):
+    def get_object(self, UUID):
+        try:
+            return ExpenseHeader.objects.get(UUID=UUID)
+        except ExpenseHeader.DoesNotExist:
+            raise Http404
+
+    def get_list(self, UUID):
+        try:
+            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
+        except ExpenseLine.DoesNotExist:
+            return []
+
+    def get(self, request, UUID):
+        expense_header = self.get_object(UUID)
+        expense_line =  self.get_list(UUID)
+        serializerH = ExpenseHeaderSerializer(expense_header)
+        serializerL = []
+        for x in expense_line :
+            serializerL.append(ExpenseLineSerializer(x).data)
+        data = serializerH.data
+        data["expense line"] = serializerL
+        return Response(data)
+
+
+class ExtendedExpenseHeaderAllUUID(APIView):
+
+    def get_all_UUID(self):
+        try:
+            return ExpenseHeader.objects.values_list("UUID", flat=True)
+        except ExpenseHeader.DoesNotExist:
+            raise Http404
+    def get_object(self, UUID):
+        try:
+            return ExpenseHeader.objects.get(UUID=UUID)
+        except ExpenseHeader.DoesNotExist:
+            raise Http404
+
+    def get_list(self, UUID):
+        try:
+            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
+        except ExpenseLine.DoesNotExist:
+            return []
+
+    def get(self,request):
+        output = []
+        UUID_values = self.get_all_UUID()
+        for UUID in UUID_values:
+            expense_header = self.get_object(UUID)
+            expense_line = self.get_list(UUID)
+            serializerH = ExpenseHeaderSerializer(expense_header)
+            serializerL = []
+            for y in expense_line:
+                serializerL.append(ExpenseLineSerializer(y).data)
+            data = serializerH.data
+            data["expense line"] = serializerL
+            output.append(data)
+        return Response(output)
 
 
 class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
