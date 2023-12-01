@@ -44,6 +44,8 @@ class UserListCreateView(generics.CreateAPIView):
 #     serializer_class = ActionItemSerializer
 #     queryset = ActionItem.objects.all()
 
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseHeaderListCreateView(generics.ListCreateAPIView):
     serializer_class = ExpenseHeaderSerializer
 
@@ -103,7 +105,8 @@ class ExpenseHeaderListCreateView(generics.ListCreateAPIView):
             validated_data['change_reason'] = change_reason  # Set the change_reason
             serializer.save(**validated_data)
 
-
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseHeader.objects.all()
     serializer_class = ExpenseHeaderSerializer
@@ -120,12 +123,16 @@ class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIVi
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def expense_header_history(request, expense_header_uuid):
     historical_records = HistoricalExpenseHeader.objects.filter(UUID=expense_header_uuid)
     serializer = HistoricalExpenseHeaderSerializer(historical_records, many=True)
     return Response(serializer.data)
 
 # GET,POST view of ExpenseLine
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseLineListCreateAPIView(generics.ListCreateAPIView):
     queryset = ExpenseLine.objects.all()
     serializer_class = ExpenseLineSerializer
@@ -166,17 +173,23 @@ class ExpenseLineListCreateAPIView(generics.ListCreateAPIView):
 
 
 # GET,PATCH,PUT,DESTROY view of expense_line(with givien UUID)
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseLineRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseLine.objects.all()
     serializer_class = ExpenseLineSerializer
     lookup_field = 'UUID'
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def expense_line_history(request, UUID):
     historical_records = HistoricalExpenseLine.objects.filter(UUID=UUID)
     serializer = HistoricalExpenseLineSerializer(historical_records, many=True)
     return Response(serializer.data)
 
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseLinesByExpenseHeader(generics.ListCreateAPIView):
     queryset = ExpenseLine.objects.all()
     serializer_class = ExpenseLineSerializer
@@ -201,6 +214,8 @@ class ExpenseLinesByExpenseHeader(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseLineByExpenseHeaderAndExpenseLineRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseLine.objects.all()
     serializer_class = ExpenseLineSerializer
@@ -223,6 +238,8 @@ class ExpenseLineByExpenseHeaderAndExpenseLineRetrieveUpdateDestroyView(generics
         return Response(serializer.data)
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def expense_lines_by_project_id(request):
     queryset = ExpenseLine.objects.all()
     project_id = request.query_params.get('project_id')
