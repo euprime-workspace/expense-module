@@ -106,21 +106,14 @@ class ExpenseHeaderListCreateView(generics.ListCreateAPIView):
             validated_data['change_reason'] = change_reason  # Set the change_reason
             serializer.save(**validated_data)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 @authentication_classes([])
 @permission_classes([AllowAny])
-=======
-=======
->>>>>>> 5bd01b91107cf1d0c6cc52634254fdda2096c045
 class ExtendedExpenseHeader(APIView):
     def get_object(self, UUID):
         try:
             return ExpenseHeader.objects.get(UUID=UUID)
         except ExpenseHeader.DoesNotExist:
             raise Http404
-<<<<<<< HEAD
-=======
 
     def get_list(self, UUID):
         try:
@@ -139,7 +132,60 @@ class ExtendedExpenseHeader(APIView):
         data["expense line"] = serializerL
         return Response(data)
 
+@authentication_classes([])
+@permission_classes([AllowAny])
+class ExtendedExpenseHeaderAllUUID(APIView):
+    def get_all_UUID(self):
+        try:
+            return ExpenseHeader.objects.values_list("UUID", flat=True)
+        except ExpenseHeader.DoesNotExist:
+            raise Http404
+    def get_object(self, UUID):
+        try:
+            return ExpenseHeader.objects.get(UUID=UUID)
+        except ExpenseHeader.DoesNotExist:
+            raise Http404
 
+    def get_list(self, UUID):
+        try:
+            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
+        except ExpenseLine.DoesNotExist:
+            return []
+
+    def get(self,request):
+        output = []
+        UUID_values = self.get_all_UUID()
+        for UUID in UUID_values:
+            expense_header = self.get_object(UUID)
+            expense_line = self.get_list(UUID)
+            serializerH = ExpenseHeaderSerializer(expense_header)
+            serializerL = []
+            for y in expense_line:
+                serializerL.append(ExpenseLineSerializer(y).data)
+            data = serializerH.data
+            data["expense line"] = serializerL
+            output.append(data)
+        return Response(output)
+
+    def get_list(self, UUID):
+        try:
+            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
+        except ExpenseLine.DoesNotExist:
+            return []
+
+    def get(self, request, UUID):
+        expense_header = self.get_object(UUID)
+        expense_line =  self.get_list(UUID)
+        serializerH = ExpenseHeaderSerializer(expense_header)
+        serializerL = []
+        for x in expense_line :
+            serializerL.append(ExpenseLineSerializer(x).data)
+        data = serializerH.data
+        data["expense line"] = serializerL
+        return Response(data)
+
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExtendedExpenseHeaderAllUUID(APIView):
 
     def get_all_UUID(self):
@@ -174,62 +220,7 @@ class ExtendedExpenseHeaderAllUUID(APIView):
             output.append(data)
         return Response(output)
 
->>>>>>> 5bd01b91107cf1d0c6cc52634254fdda2096c045
 
-    def get_list(self, UUID):
-        try:
-            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
-        except ExpenseLine.DoesNotExist:
-            return []
-
-    def get(self, request, UUID):
-        expense_header = self.get_object(UUID)
-        expense_line =  self.get_list(UUID)
-        serializerH = ExpenseHeaderSerializer(expense_header)
-        serializerL = []
-        for x in expense_line :
-            serializerL.append(ExpenseLineSerializer(x).data)
-        data = serializerH.data
-        data["expense line"] = serializerL
-        return Response(data)
-
-
-class ExtendedExpenseHeaderAllUUID(APIView):
-
-    def get_all_UUID(self):
-        try:
-            return ExpenseHeader.objects.values_list("UUID", flat=True)
-        except ExpenseHeader.DoesNotExist:
-            raise Http404
-    def get_object(self, UUID):
-        try:
-            return ExpenseHeader.objects.get(UUID=UUID)
-        except ExpenseHeader.DoesNotExist:
-            raise Http404
-
-    def get_list(self, UUID):
-        try:
-            return ExpenseLine.objects.filter(expense_header_uuid=UUID)
-        except ExpenseLine.DoesNotExist:
-            return []
-
-    def get(self,request):
-        output = []
-        UUID_values = self.get_all_UUID()
-        for UUID in UUID_values:
-            expense_header = self.get_object(UUID)
-            expense_line = self.get_list(UUID)
-            serializerH = ExpenseHeaderSerializer(expense_header)
-            serializerL = []
-            for y in expense_line:
-                serializerL.append(ExpenseLineSerializer(y).data)
-            data = serializerH.data
-            data["expense line"] = serializerL
-            output.append(data)
-        return Response(output)
-
-
->>>>>>> 5bd01b9 (Extended expense functionality)
 class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseHeader.objects.all()
     serializer_class = ExpenseHeaderSerializer
