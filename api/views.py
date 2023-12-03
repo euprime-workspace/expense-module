@@ -220,7 +220,8 @@ class ExtendedExpenseHeaderAllUUID(APIView):
             output.append(data)
         return Response(output)
 
-
+@authentication_classes([])
+@permission_classes([AllowAny])
 class ExpenseHeaderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ExpenseHeader.objects.all()
     serializer_class = ExpenseHeaderSerializer
